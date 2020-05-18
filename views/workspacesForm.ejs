@@ -1,0 +1,76 @@
+<div class="row mt-5">
+  <div class="col-md-6 m-auto">
+    <div class="card card-body">
+      <%- include('./partials/messages') %>
+      <form
+        action="<%if(!locals.workspace){ %>/workspaces/create?token=<%= token %> <% }else{ %> /workspaces/<%= workspace.id %>/edit?token=<%= token %> <% } %>"
+        method="POST">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="name" id="name" name="name" <% if(locals.workspace){ %> value="<%=workspace.name%>" <% } %> class="form-control"
+            placeholder="Enter Name" value="<%= typeof name != 'undefined' ? name : '' %>" />
+        </div>
+        <div class="form-group">
+          <label for="email">SubDomain</label>
+          <input type="name" id="subDomain" <% if(locals.workspace){%> value="<%=workspace.subDomain%>" <% } %> name="subDomain" class="form-control"
+            placeholder="Enter subDomain" value="<%= typeof subDomain != 'undefined' ? subDomain : '' %>" />
+          <span id='subDomainStatus' style="display: none;"></span>
+          <div id='availableSubDomains' style="display: none;"></div>
+        </div>
+        <button disabled="disabled" type="submit" class="btn btn-primary btn-block" id="button">
+          <%if (!locals.workspace){ %>
+          Create
+          <% }else{ %>
+          Edit
+          <% } %>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  const debounce = (func, delay) => {
+    let debounceTimer
+    return function () {
+      const context = this
+      const args = arguments
+      clearTimeout(debounceTimer)
+
+      debounceTimer = setTimeout(() => func.apply(context, args), delay)
+    }
+  };
+  const findAllAvailableSubdomains = debounce(function () {
+    const xhttp = new XMLHttpRequest();
+    xhttp.responseType = 'json';
+    xhttp.onload = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        let responseObj = xhttp.response;
+        const statusElem = document.getElementById('subDomainStatus');
+        const availabaleSubdomains = document.getElementById('availableSubDomains');
+        const button = document.getElementById('button');
+        statusElem.innerHTML = responseObj.message;
+        statusElem.style.display = 'block'
+        if (responseObj.result.length === 0) {
+          button.disabled = false
+          availabaleSubdomains.style.display = 'none'
+          return
+        }
+        responseObj.result.forEach((elem) => {
+          const span = document.createElement("span");  
+          const br = document.createElement("br");
+          span.innerHTML = elem;
+          availabaleSubdomains.appendChild(span);
+          availabaleSubdomains.appendChild(br);
+        })
+        availabaleSubdomains.style.display = 'block'
+        
+      }
+    };
+    xhttp.open("GET", `/workspaces/form/check-subdomain?subDomain=${this.value}`, true);
+    xhttp.send();
+  }, 1000);
+
+
+  document.getElementById("subDomain").addEventListener('keyup', findAllAvailableSubdomains);
+
+</script>

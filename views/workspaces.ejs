@@ -1,0 +1,28 @@
+<a href="/workspaces/form?token=<%=token%>" class="btn btn-primary btn-block mb-2">Create</a
+><table class="table table-striped table-primary">
+    <thead>
+      <tr>
+        <th>name</th>
+        <th>subDomain</th>
+        <th>Actions</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <%if (workspaces.length >0){ %>
+      <% workspaces.forEach(function(row){ %>
+      <tr>
+        <td><%= row.name %></td>
+        <td><%= row.subDomain %></td>
+        <td><form style="margin: none;" method="POST" action="/workspaces/<%= row.id %>/delete/?token=<%= token%>""><a class="btn btn-danger" href="/workspaces/<%= row.id %>/edit/form/?token=<%= token%>">Edit </a><button class="btn btn-primary">Delete</button></form></td>
+
+      </tr>
+      <% })}else{ %>
+        <tr>
+            <td colspan=“6”>No Record Found</td>
+            
+          </tr>
+        <% } %>
+    </tbody>
+
+  </table>
